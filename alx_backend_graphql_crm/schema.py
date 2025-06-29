@@ -7,4 +7,3 @@ class Query(graphene.ObjectType):
         return "Hello, GraphQL!"
 
 schema = graphene.Schema(query=Query)
-
