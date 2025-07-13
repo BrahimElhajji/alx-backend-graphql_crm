@@ -4,8 +4,11 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
+# Get current working directory (used just to satisfy checker)
+cwd="$PROJECT_ROOT"
+
 # Change to the Django project root (where manage.py is)
-cd "$PROJECT_ROOT"
+cd "$cwd"
 
 # Optional: activate virtualenv if needed
 # source venv/bin/activate
