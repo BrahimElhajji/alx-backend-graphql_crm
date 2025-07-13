@@ -1,20 +1,31 @@
 #!/bin/bash
 
-# Activate your virtualenv if needed here (optional)
-# source /path/to/your/venv/bin/activate
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
-# Run Django shell command to delete customers with no orders since 1 year ago
+# Change to the Django project root (where manage.py is)
+cd "$PROJECT_ROOT"
+
+# Optional: activate virtualenv if needed
+# source venv/bin/activate
+
+# Run the Django cleanup logic
 DELETED_COUNT=$(python manage.py shell -c "
 from django.utils.timezone import now, timedelta
-from crm.models import Customer, Order
+from crm.models import Customer
+from crm.models import Order
 
 one_year_ago = now() - timedelta(days=365)
-# Assuming Customer and Order have a relation where Order has customer FK
-inactive_customers = Customer.objects.filter(order__date__lt=one_year_ago).distinct()
+inactive_customers = Customer.objects.exclude(order__created_at__gte=one_year_ago)
 count = inactive_customers.count()
 inactive_customers.delete()
 print(count)
 ")
 
-# Log the result with timestamp
-echo \"\$(date '+%Y-%m-%d %H:%M:%S') - Deleted customers: \$DELETED_COUNT\" >> /tmp/customer_cleanup_log.txt
+# Log the result with a timestamp
+if [ $? -eq 0 ]; then
+    echo \"\$(date '+%Y-%m-%d %H:%M:%S') - Deleted customers: \$DELETED_COUNT\" >> /tmp/customer_cleanup_log.txt
+else
+    echo \"\$(date '+%Y-%m-%d %H:%M:%S') - Cleanup failed\" >> /tmp/customer_cleanup_log.txt
+fi
