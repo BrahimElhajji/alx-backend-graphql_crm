@@ -18,6 +18,7 @@ class CustomerType(DjangoObjectType):
 class ProductType(DjangoObjectType):
     class Meta:
         model = Product
+        fields = ("id", "name", "stock")
 
 class OrderType(DjangoObjectType):
     class Meta:
@@ -153,6 +154,9 @@ class CreateOrder(graphene.Mutation):
         return CreateOrder(order=order)
 
 class UpdateLowStockProducts(graphene.Mutation):
+    class Arguments:
+        pass
+
     updated_products = graphene.List(ProductType)
     success_message = graphene.String()
 
@@ -165,8 +169,10 @@ class UpdateLowStockProducts(graphene.Mutation):
             product.save()
             updated_products.append(product)
 
-        success_message = f"Updated {len(updated_products)} products successfully."
-        return UpdateLowStockProducts(updated_products=updated_products, success_message=success_message)
+        return UpdateLowStockProducts(
+            updated_products=updated_products,
+            success_message="Stock updated for low-stock products."
+        )
 
 class Mutation(graphene.ObjectType):
     create_customer = CreateCustomer.Field()
